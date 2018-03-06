@@ -803,7 +803,7 @@ func (b *Bucket) SignedURL(path string, expires time.Time) string {
 // to upload the object at path. The signature is valid until expires.
 // contenttype is a string like image/png
 // path is the resource name in s3 terminalogy like images/ali.png [obviously exclusing the bucket name itself]
-func (b *Bucket) UploadSignedURL(path, method, content_type string, expires time.Time) string {
+func (b *Bucket) UploadSignedURL(path, method, content_type string, expires time.Time, fileName string) string {
 	expire_date := expires.Unix()
 	if method != "POST" {
 		method = "PUT"
@@ -829,6 +829,10 @@ func (b *Bucket) UploadSignedURL(path, method, content_type string, expires time
 	params.Add("AWSAccessKeyId", accessId)
 	params.Add("Expires", strconv.FormatInt(expire_date, 10))
 	params.Add("Signature", signature)
+	if len(fileName) > 0 {
+		params.Add("ResponseContentDisposition", "attachment; filename =\"" + fileName + "\"")
+	}
+	
 	if a.Token() != "" {
 		params.Add("token", a.Token())
 	}
