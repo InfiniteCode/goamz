@@ -778,11 +778,13 @@ func (b *Bucket) URL(path string) string {
 
 // SignedURL returns a signed URL that allows anyone holding the URL
 // to retrieve the object at path. The signature is valid until expires.
-func (b *Bucket) SignedURL(path string, expires time.Time) string {
+func (b *Bucket) SignedURL(path string, expires time.Time, fileName string) string {
 	req := &request{
 		bucket: b.Name,
 		path:   path,
-		params: url.Values{"Expires": {strconv.FormatInt(expires.Unix(), 10)}},
+		params: url.Values{
+			"Expires": {strconv.FormatInt(expires.Unix(), 10)},
+			"ResponseContentDisposition": 'attachment; filename ="' + fileName + '"'},
 	}
 	err := b.S3.prepare(req)
 	if err != nil {
@@ -803,7 +805,7 @@ func (b *Bucket) SignedURL(path string, expires time.Time) string {
 // to upload the object at path. The signature is valid until expires.
 // contenttype is a string like image/png
 // path is the resource name in s3 terminalogy like images/ali.png [obviously exclusing the bucket name itself]
-func (b *Bucket) UploadSignedURL(path, method, content_type string, expires time.Time, fileName string) string {
+func (b *Bucket) UploadSignedURL(path, method, content_type string, expires time.Time) string {
 	expire_date := expires.Unix()
 	if method != "POST" {
 		method = "PUT"
@@ -829,9 +831,6 @@ func (b *Bucket) UploadSignedURL(path, method, content_type string, expires time
 	params.Add("AWSAccessKeyId", accessId)
 	params.Add("Expires", strconv.FormatInt(expire_date, 10))
 	params.Add("Signature", signature)
-	if len(fileName) > 0 {
-		params.Add("ResponseContentDisposition", "attachment; filename =\"" + fileName + "\"")
-	}
 	
 	if a.Token() != "" {
 		params.Add("token", a.Token())
