@@ -784,7 +784,7 @@ func (b *Bucket) SignedURL(path string, expires time.Time, fileName string) stri
 		path:   path,
 		params: url.Values{
 			"Expires": {strconv.FormatInt(expires.Unix(), 10)},
-			"ResponseContentDisposition": {"attachment; filename =\"" + fileName + "\""}},
+			"Response-Content-Disposition": {"attachment; filename =\"" + fileName + "\""}},
 	}
 	err := b.S3.prepare(req)
 	if err != nil {
