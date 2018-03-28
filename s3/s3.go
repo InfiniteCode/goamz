@@ -784,7 +784,8 @@ func (b *Bucket) SignedURL(path string, expires time.Time, fileName string) stri
 		path:   path,
 		params: url.Values{
 			"Expires": {strconv.FormatInt(expires.Unix(), 10)},
-			"Response-Content-Disposition": {"attachment; filename =\"" + fileName + "\""}},
+			"response-content-type": {"application/octet-stream"},
+			"response-content-disposition": {"attachment; filename=\"" + fileName + "\""}},
 	}
 	err := b.S3.prepare(req)
 	if err != nil {
@@ -831,7 +832,7 @@ func (b *Bucket) UploadSignedURL(path, method, content_type string, expires time
 	params.Add("AWSAccessKeyId", accessId)
 	params.Add("Expires", strconv.FormatInt(expire_date, 10))
 	params.Add("Signature", signature)
-	
+
 	if a.Token() != "" {
 		params.Add("token", a.Token())
 	}
