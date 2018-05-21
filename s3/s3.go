@@ -802,6 +802,30 @@ func (b *Bucket) SignedURL(path string, expires time.Time, fileName string) stri
 	}
 }
 
+// SignedPreviewURL returns a signed URL that allows anyone holding the URL
+// to retrieve the object at path. The signature is valid until expires.
+func (b *Bucket) SignedPreviewURL(path string, expires time.Time, fileName string) string {
+	req := &request{
+		bucket: b.Name,
+		path:   path,
+		params: url.Values{
+			"Expires": {strconv.FormatInt(expires.Unix(), 10)}},
+	}
+	err := b.S3.prepare(req)
+	if err != nil {
+		panic(err)
+	}
+	u, err := req.url()
+	if err != nil {
+		panic(err)
+	}
+	if b.S3.Auth.Token() != "" {
+		return u.String() + "&x-amz-security-token=" + url.QueryEscape(req.headers["X-Amz-Security-Token"][0])
+	} else {
+		return u.String()
+	}
+}
+
 // UploadSignedURL returns a signed URL that allows anyone holding the URL
 // to upload the object at path. The signature is valid until expires.
 // contenttype is a string like image/png
