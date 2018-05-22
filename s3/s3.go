@@ -809,7 +809,8 @@ func (b *Bucket) SignedPreviewURL(path string, expires time.Time, fileName strin
 		bucket: b.Name,
 		path:   path,
 		params: url.Values{
-			"Expires": {strconv.FormatInt(expires.Unix(), 10)}},
+			"Expires": {strconv.FormatInt(expires.Unix(), 10)},
+			"response-content-disposition": {"inline; filename=\"" + fileName + "\""}},
 	}
 	err := b.S3.prepare(req)
 	if err != nil {
