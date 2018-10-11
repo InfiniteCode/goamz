@@ -25,12 +25,14 @@ import (
 	"net/http"
 	"net/http/httputil"
 	"net/url"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"sync"
 	"time"
 
 	"github.com/goamz/goamz/aws"
+	"gopkg.in/h2non/filetype.v1"
 )
 
 const debug = false
@@ -805,11 +807,13 @@ func (b *Bucket) SignedURL(path string, expires time.Time, fileName string) stri
 // SignedPreviewURL returns a signed URL that allows anyone holding the URL
 // to retrieve the object at path. The signature is valid until expires.
 func (b *Bucket) SignedPreviewURL(path string, expires time.Time, fileName string) string {
+	fileExt := filepath.Ext(fileName)
 	req := &request{
 		bucket: b.Name,
 		path:   path,
 		params: url.Values{
-			"Expires": {strconv.FormatInt(expires.Unix(), 10)},
+			"Expires":                      {strconv.FormatInt(expires.Unix(), 10)},
+			"response-content-type":        {filetype.GetType(fileExt[1:]).MIME.Value},
 			"response-content-disposition": {"inline; filename=\"" + fileName + "\""}},
 	}
 	err := b.S3.prepare(req)
