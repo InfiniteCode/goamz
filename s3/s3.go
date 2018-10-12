@@ -785,8 +785,8 @@ func (b *Bucket) SignedURL(path string, expires time.Time, fileName string) stri
 		bucket: b.Name,
 		path:   path,
 		params: url.Values{
-			"Expires": {strconv.FormatInt(expires.Unix(), 10)},
-			"response-content-type": {"application/octet-stream"},
+			"Expires":                      {strconv.FormatInt(expires.Unix(), 10)},
+			"response-content-type":        {"application/octet-stream"},
 			"response-content-disposition": {"attachment; filename=\"" + fileName + "\""}},
 	}
 	err := b.S3.prepare(req)
@@ -807,7 +807,12 @@ func (b *Bucket) SignedURL(path string, expires time.Time, fileName string) stri
 // SignedPreviewURL returns a signed URL that allows anyone holding the URL
 // to retrieve the object at path. The signature is valid until expires.
 func (b *Bucket) SignedPreviewURL(path string, expires time.Time, fileName string) string {
-	fileExt := filepath.Ext(fileName)
+	fileExt := strings.ToLower(filepath.Ext(fileName))
+
+	if fileExt == ".jpeg" {
+		fileExt = ".jpg"
+	}
+
 	req := &request{
 		bucket: b.Name,
 		path:   path,
